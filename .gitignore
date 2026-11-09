@@ -1,0 +1,30 @@
+# Build output and local caches
+build/
+.gradle/
+.kotlin/
+*.apk
+*.apks
+*.aab
+*.ap_
+*.dex
+*.class
+.externalNativeBuild/
+.cxx/
+
+# Reverse-engineering inputs and output
+.analysis/
+
+# Machine-local configuration and signing material
+local.properties
+signing.properties
+*.jks
+*.keystore
+
+# IDE state and logs
+.idea/
+*.iml
+*.iws
+*.ipr
+*.log
+hs_err_pid*
+.DS_Store
