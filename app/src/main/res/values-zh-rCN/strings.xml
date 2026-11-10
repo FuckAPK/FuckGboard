@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fuck Gboard</string>
+    <string name="app_desc">管理并加载 Gboard 自定义词库资源。</string>
+    <string name="dictionary_title">自定义词库</string>
+    <string name="dictionary_access_direct_root">直接 Root</string>
+    <string name="dictionary_access_root_shizuku">Root 模式 Shizuku</string>
+    <string name="dictionary_access_shizuku_hint">请使用 Root 启动 Shizuku 并授权本应用，其工作进程还须能访问 Gboard 数据。此模式不会调用 su，也不会自动切换为直接 Root。</string>
+    <string name="dictionary_shizuku_authorize">授权 Shizuku</string>
+    <string name="dictionary_shizuku_authorizing">等待 Shizuku 授权…</string>
+    <string name="dictionary_shizuku_denied">Shizuku 授权被拒绝，可点击“授权 Shizuku”重试。</string>
+    <string name="dictionary_shizuku_denied_permanently">Shizuku 授权已被拒绝且选择了“不再询问”。请在 Shizuku 的已授权应用中允许本应用，再返回点击“授权 Shizuku”。</string>
+    <string name="dictionary_language">语言前缀</string>
+    <string name="dictionary_language_hint">例如：zh_CN、zh_TW、ko、zh_Hant_TW</string>
+    <string name="dictionary_apply_language">应用</string>
+    <string name="dictionary_import">导入词库</string>
+    <string name="dictionary_refresh">刷新</string>
+    <string name="dictionary_target">目标位置</string>
+    <string name="dictionary_target_pending">成功刷新后显示目标位置。</string>
+    <string name="dictionary_restart_hint">需要 Root 权限。文件名需与原资源一致，导入将覆盖同名文件；更改后请自行重启 Gboard 生效。</string>
+    <string name="dictionary_installed">已安装词库</string>
+    <string name="dictionary_empty">暂无自定义词库</string>
+    <string name="dictionary_loading">正在刷新词库…</string>
+    <string name="dictionary_picking">等待选择文件…</string>
+    <string name="dictionary_importing">正在导入词库…</string>
+    <string name="dictionary_deleting">正在删除词库…</string>
+    <string name="dictionary_delete_action">删除 %1$s</string>
+    <string name="dictionary_delete_title">删除词库？</string>
+    <string name="dictionary_delete_message">确定删除“%1$s”？此操作无法撤销。</string>
+    <string name="dictionary_delete_confirm">删除</string>
+    <string name="dictionary_cancel">取消</string>
+    <string name="dictionary_refreshed">词库已刷新</string>
+    <string name="dictionary_imported">成功导入 %1$d 个，失败 %2$d 个</string>
+    <string name="dictionary_deleted">词库已删除</string>
+    <string name="dictionary_failed">操作失败</string>
+    <string name="dictionary_refresh_failed">无法刷新文件列表</string>
+    <string name="dictionary_error_title">错误详情</string>
+    <string name="dictionary_error_unknown">发生未知错误。</string>
+</resources>

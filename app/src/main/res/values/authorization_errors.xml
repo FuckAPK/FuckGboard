@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="authorization_error_shizuku_unavailable">Shizuku is unavailable. Start Shizuku in Root mode, then try again.</string>
+    <string name="authorization_error_shizuku_version">Shizuku API 13 or newer is required for dictionary access.</string>
+    <string name="authorization_error_shizuku_denied">Shizuku permission is not granted. Authorize this app in Shizuku.</string>
+    <string name="authorization_error_shizuku_root">Shizuku must run as Root (UID 0). ADB or wireless-debugging mode cannot access Gboard data.</string>
+    <string name="authorization_error_shizuku_disconnected">The dictionary service disconnected. A pending change may have completed; refresh the list before trying again.</string>
+    <string name="authorization_error_shizuku_timeout">The Root Shizuku dictionary service did not start in time.</string>
+    <string name="authorization_error_closed">This dictionary connection is closed. Reopen the dictionary manager.</string>
+    <string name="authorization_error_cancelled">The dictionary connection was cancelled.</string>
+    <string name="authorization_error_request">The dictionary request was rejected: its target or arguments are invalid.</string>
+    <string name="authorization_error_source">The import source is not a safe, regular dictionary staging file in this app’s cache.</string>
+    <string name="authorization_error_mirror">Root Shizuku cannot verify safe access to the app data directories. No system permissions or mounts were changed, and su will not be invoked. Direct Root can be selected manually.</string>
+    <string name="authorization_error_service">The Root Shizuku dictionary service is unavailable or returned an invalid response.</string>
+</resources>

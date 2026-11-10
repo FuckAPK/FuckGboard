@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="authorization_error_shizuku_unavailable">Shizuku 不可用，请以 Root 模式启动 Shizuku 后重试。</string>
+    <string name="authorization_error_shizuku_version">词典访问需要 Shizuku API 13 或更新版本。</string>
+    <string name="authorization_error_shizuku_denied">尚未获得 Shizuku 授权，请在 Shizuku 中授权本应用。</string>
+    <string name="authorization_error_shizuku_root">Shizuku 必须以 Root（UID 0）运行；ADB 或无线调试模式无法访问 Gboard 数据。</string>
+    <string name="authorization_error_shizuku_disconnected">词典服务连接已断开。正在进行的修改可能已经完成，请先刷新列表再重试。</string>
+    <string name="authorization_error_shizuku_timeout">Root Shizuku 词典服务启动超时。</string>
+    <string name="authorization_error_closed">词典连接已关闭，请重新打开词典管理器。</string>
+    <string name="authorization_error_cancelled">词典连接已取消。</string>
+    <string name="authorization_error_request">词典请求被拒绝：目标或参数无效。</string>
+    <string name="authorization_error_source">导入源不是本应用缓存目录中安全的普通词典暂存文件。</string>
+    <string name="authorization_error_mirror">Root Shizuku 无法验证应用数据目录的安全访问路径。未修改系统权限或挂载，也不会调用 su；可手动选择“直接 Root”。</string>
+    <string name="authorization_error_service">Root Shizuku 词典服务不可用，或返回了无效响应。</string>
+</resources>

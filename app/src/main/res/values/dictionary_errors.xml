@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dictionary_error_language">Invalid language prefix. Use a format such as ko, zh_CN or zh_Hant_TW.</string>
+    <string name="dictionary_error_name">Invalid file name: paths, control characters and internal temporary names are not allowed.</string>
+    <string name="dictionary_error_gboard">Gboard is not installed, or its application information is unavailable.</string>
+    <string name="dictionary_error_root">Root access is unavailable. Allow this app in your Root manager.</string>
+    <string name="dictionary_error_directory">The dictionary directory is inaccessible or is not a regular directory.</string>
+    <string name="dictionary_error_access">Gboard cannot access the existing directory. Check its owner and access permissions.</string>
+    <string name="dictionary_error_link">Refusing a symbolic link or a changed path to protect your data.</string>
+    <string name="dictionary_error_target">The target is not a regular file, or it no longer exists.</string>
+    <string name="dictionary_error_metadata">Could not set the Gboard file owner, permissions or modification time.</string>
+    <string name="dictionary_error_restorecon">Could not restore SELinux labels. Import was not completed.</string>
+    <string name="dictionary_error_copy">Could not copy the dictionary. The original file was not replaced.</string>
+    <string name="dictionary_error_rename">Atomic replacement failed. The original file was not replaced.</string>
+    <string name="dictionary_error_io">File I/O or the Root command failed.</string>
+    <string name="dictionary_error_provider">Could not read the selected file name or contents.</string>
+</resources>

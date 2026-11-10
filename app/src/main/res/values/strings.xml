@@ -1,5 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Fuck Gboard</string>
-    <string name="app_desc">Use a custom Chinese base dictionary in Gboard.</string>
+    <string name="app_desc">Manage and load custom dictionary resources in Gboard.</string>
+    <string name="dictionary_title">Custom dictionaries</string>
+    <string name="dictionary_access_direct_root">Direct Root</string>
+    <string name="dictionary_access_root_shizuku">Root Shizuku</string>
+    <string name="dictionary_access_shizuku_hint">Start Shizuku with Root, then authorize this app. Its worker must be able to access Gboard data. This mode never invokes su or automatically switches to Direct Root.</string>
+    <string name="dictionary_shizuku_authorize">Authorize Shizuku</string>
+    <string name="dictionary_shizuku_authorizing">Waiting for Shizuku authorization…</string>
+    <string name="dictionary_shizuku_denied">Shizuku authorization was denied. Tap Authorize Shizuku to try again.</string>
+    <string name="dictionary_shizuku_denied_permanently">Shizuku authorization was denied with “don’t ask again”. Allow this app in Shizuku’s authorized applications, then return and tap Authorize Shizuku.</string>
+    <string name="dictionary_language">Language prefix</string>
+    <string name="dictionary_language_hint">For example: zh_CN, zh_TW, ko, zh_Hant_TW</string>
+    <string name="dictionary_apply_language">Apply</string>
+    <string name="dictionary_import">Import dictionaries</string>
+    <string name="dictionary_refresh">Refresh</string>
+    <string name="dictionary_target">Target directory</string>
+    <string name="dictionary_target_pending">The directory will appear after a successful refresh.</string>
+    <string name="dictionary_restart_hint">Root access is required. File names must match the original resources. Import replaces same-named files. Restart Gboard yourself for changes to take effect.</string>
+    <string name="dictionary_installed">Installed dictionaries</string>
+    <string name="dictionary_empty">No custom dictionaries</string>
+    <string name="dictionary_loading">Refreshing dictionaries…</string>
+    <string name="dictionary_picking">Waiting for file selection…</string>
+    <string name="dictionary_importing">Importing dictionaries…</string>
+    <string name="dictionary_deleting">Deleting dictionary…</string>
+    <string name="dictionary_delete_action">Delete %1$s</string>
+    <string name="dictionary_delete_title">Delete dictionary?</string>
+    <string name="dictionary_delete_message">Delete “%1$s”? This cannot be undone.</string>
+    <string name="dictionary_delete_confirm">Delete</string>
+    <string name="dictionary_cancel">Cancel</string>
+    <string name="dictionary_refreshed">Dictionaries refreshed</string>
+    <string name="dictionary_imported">Imported %1$d; failed %2$d</string>
+    <string name="dictionary_deleted">Dictionary deleted</string>
+    <string name="dictionary_failed">Operation failed</string>
+    <string name="dictionary_refresh_failed">Could not refresh the file list</string>
+    <string name="dictionary_error_title">Error details</string>
+    <string name="dictionary_error_unknown">An unknown error occurred.</string>
 </resources>

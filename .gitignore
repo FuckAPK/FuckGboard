@@ -22,6 +22,7 @@ signing.properties
 
 # IDE state and logs
 .idea/
+kls_database.db
 *.iml
 *.iws
 *.ipr
