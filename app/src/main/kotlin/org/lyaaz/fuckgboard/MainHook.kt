@@ -3,39 +3,50 @@ package org.lyaaz.fuckgboard
 import android.app.Application
 import android.content.Context
 import android.os.Build
-import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
-import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import android.util.Log
+import io.github.libxposed.api.XposedInterface.Chain
+import io.github.libxposed.api.XposedInterface.HookHandle
+import io.github.libxposed.api.XposedInterface.Hooker
+import io.github.libxposed.api.XposedModule
+import io.github.libxposed.api.XposedModuleInterface.ModuleLoadedParam
+import io.github.libxposed.api.XposedModuleInterface.PackageReadyParam
 import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.atomic.AtomicBoolean
 
-class MainHook : IXposedHookLoadPackage {
-    override fun handleLoadPackage(lpparam: LoadPackageParam) {
-        if (lpparam.packageName != TARGET_PACKAGE) return
+class MainHook : XposedModule() {
+    private lateinit var processName: String
+
+    override fun onModuleLoaded(param: ModuleLoadedParam) {
+        processName = param.processName
+    }
+
+    override fun onPackageReady(param: PackageReadyParam) {
+        if (param.packageName != TARGET_PACKAGE) return
         val initialized = AtomicBoolean()
         val report: (String) -> Unit = {
             // A broken logging sink must not change the host's return values or exceptions.
             try {
-                XposedBridge.log("[FuckGboard][${lpparam.processName}] $it")
+                log(Log.INFO, "FuckGboard", "[FuckGboard][$processName] $it")
             } catch (_: Throwable) {
             }
         }
         try {
             val attach = Application::class.java.getDeclaredMethod("attach", Context::class.java)
-            checkNotNull(XposedBridge.hookMethod(attach, object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam) {
-                    if (param.hasThrowable()) return
-                    val context = param.args[0] as? Context ?: return
-                    if (context.packageName != TARGET_PACKAGE || !initialized.compareAndSet(false, true)) return
+            hook(attach).intercept(object : Hooker {
+                override fun intercept(chain: Chain): Any? {
+                    // Do not catch or replace exceptions from the host.
+                    val result = chain.proceed()
+                    val context = chain.getArg(0) as? Context ?: return result
+                    if (context.packageName != TARGET_PACKAGE || !initialized.compareAndSet(false, true)) return result
                     try {
-                        install(context, lpparam.classLoader, report)
+                        install(context, param.classLoader, report)
                     } catch (t: Throwable) {
                         report("disabled: ${t.javaClass.simpleName}: ${t.message}")
                     }
+                    return result
                 }
-            })) { "Application.attach hook rejected" }
+            })
         } catch (t: Throwable) {
             report("attach unavailable; unchanged: ${t.javaClass.simpleName}: ${t.message}")
         }
@@ -62,65 +73,72 @@ class MainHook : IXposedHookLoadPackage {
         val ready = AtomicBoolean()
         val bindings = SchemeBindings()
         val unrecognizedReported = AtomicBoolean()
-        fun callback(enrolling: Boolean) = object : XC_MethodHook() {
-            override fun beforeHookedMethod(param: MethodHookParam) {
-                if (!ready.get()) return
-                var prepared: SchemeBindings.Call? = null
-                try {
-                    val handle = param.args[0] as? Long ?: return
-                    if (handle == 0L) return
-                    val original = param.args[1] as? ByteArray ?: return
-                    var root: String? = null
-                    val call = if (enrolling) {
-                        val scheme = DataSchemeCodec.parse(original) ?: run {
+        fun callback(enrolling: Boolean) = object : Hooker {
+            override fun intercept(chain: Chain): Any? {
+                if (!ready.get()) return chain.proceed()
+                val handle = chain.getArg(0) as? Long ?: return chain.proceed()
+                if (handle == 0L) return chain.proceed()
+                val original = chain.getArg(1) as? ByteArray ?: return chain.proceed()
+                var root: String? = null
+                val call = try {
+                    if (enrolling) {
+                        val scheme = DataSchemeCodec.parse(original)
+                        if (scheme == null) {
                             if (unrecognizedReported.compareAndSet(false, true)) {
                                 report("unrecognized JNI filesystem scheme; unchanged")
                             }
-                            return
-                        }
-                        val source = policy.identifySource(File(scheme.root)) ?: return
-                        root = scheme.root
-                        bindings.beginEnroll(handle, original) {
-                            policy.rewriteFor(source, scheme) ?: original
+                            null
+                        } else {
+                            val source = policy.identifySource(File(scheme.root))
+                            if (source == null) {
+                                null
+                            } else {
+                                root = scheme.root
+                                bindings.beginEnroll(handle, original) {
+                                    policy.rewriteFor(source, scheme) ?: original
+                                }
+                            }
                         }
                     } else {
-                        // The exact original bytes identify an already validated binding.
-                        // Do not reparse or consult directories that may have disappeared.
-                        bindings.beginWithdraw(handle, original) ?: return
+                        // Reuse the validated binding even if its directories have disappeared.
+                        bindings.beginWithdraw(handle, original)
                     }
-                    prepared = call
-                    param.setObjectExtra(CALL_STATE_KEY, Invocation(call, handle, root))
-                    if (call.redirected) param.args[1] = call.bytes
                 } catch (t: Throwable) {
-                    prepared?.let { bindings.finish(it, false) }
                     report("JNI preparation unchanged: ${t.javaClass.simpleName}: ${t.message}")
-                }
-            }
+                    null
+                } ?: return chain.proceed()
 
-            override fun afterHookedMethod(param: MethodHookParam) {
+                var result: Any? = null
+                var failure: Throwable? = null
                 try {
-                    val invocation = param.getObjectExtra(CALL_STATE_KEY) as? Invocation ?: return
-                    val success = !param.hasThrowable() && param.result == true
-                    bindings.finish(invocation.call, success)
-                    val operation = if (enrolling) "enroll" else "withdraw"
-                    val outcome = if (param.hasThrowable()) {
-                        "exception=${param.throwable.javaClass.simpleName}"
+                    result = if (call.redirected) {
+                        chain.proceed(arrayOf(handle, call.bytes))
                     } else {
-                        "result=${param.result}"
+                        chain.proceed()
                     }
-                    val location = invocation.root?.let { " original=$it" }.orEmpty()
-                    report("JNI $operation handle=${invocation.handle}$location redirected=${invocation.call.redirected} $outcome")
+                    return result
                 } catch (t: Throwable) {
-                    report("JNI observation unavailable: ${t.javaClass.simpleName}: ${t.message}")
+                    failure = t
+                    throw t
+                } finally {
+                    try {
+                        bindings.finish(call, failure == null && result == true)
+                        val operation = if (enrolling) "enroll" else "withdraw"
+                        val outcome = failure?.let { "exception=${it.javaClass.simpleName}" } ?: "result=$result"
+                        val location = root?.let { " original=$it" }.orEmpty()
+                        report("JNI $operation handle=$handle$location redirected=${call.redirected} $outcome")
+                    } catch (t: Throwable) {
+                        report("JNI observation unavailable: ${t.javaClass.simpleName}: ${t.message}")
+                    }
                 }
             }
         }
 
-        var enrollmentHook: XC_MethodHook.Unhook? = null
-        var withdrawalHook: XC_MethodHook.Unhook? = null
+        var enrollmentHook: HookHandle? = null
+        var withdrawalHook: HookHandle? = null
         try {
-            enrollmentHook = checkNotNull(XposedBridge.hookMethod(enroll, callback(true))) { "enrollment hook rejected" }
-            withdrawalHook = checkNotNull(XposedBridge.hookMethod(withdraw, callback(false))) { "withdrawal hook rejected" }
+            enrollmentHook = hook(enroll).intercept(callback(true))
+            withdrawalHook = hook(withdraw).intercept(callback(false))
             // An incomplete pair must never begin redirecting registrations.
             ready.set(true)
             report("installed boundary=$MANAGER_CLASS wire=filesystem-scheme-v1 overlay=per-file gboard=${info.versionName} ($versionCode) automaticLanguagePrefixes=true")
@@ -135,11 +153,8 @@ class MainHook : IXposedHookLoadPackage {
         }
     }
 
-    private class Invocation(val call: SchemeBindings.Call, val handle: Long, val root: String?)
-
     private companion object {
         const val TARGET_PACKAGE = "com.google.android.inputmethod.latin"
         const val MANAGER_CLASS = "com.google.android.apps.inputmethod.libs.hmm.DataManagerImpl"
-        const val CALL_STATE_KEY = "org.lyaaz.fuckgboard.jniInvocation"
     }
 }

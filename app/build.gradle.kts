@@ -1,6 +1,6 @@
 plugins {
     id("fuck.android.application")
-    id("fuck.xposed.legacy")
+    id("fuck.xposed.modern")
 }
 
 android {
