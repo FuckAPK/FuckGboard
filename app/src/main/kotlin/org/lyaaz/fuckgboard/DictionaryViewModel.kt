@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -32,31 +33,29 @@ internal data class DictionaryUiState(
     val notice: DictionaryNotice? = null
 )
 
-class DictionaryViewModel(application: Application) : AndroidViewModel(application) {
+class DictionaryViewModel(application: Application, savedState: SavedStateHandle) : AndroidViewModel(application) {
     private val preferences = application.getSharedPreferences("dictionary_access", Application.MODE_PRIVATE)
     private val managerMutex = Mutex()
     private var manager: DictionaryManager? = null
     private var managerGeneration = -1L
     private var generation = 0L
-    private data class PickerSelection(
-        val language: String,
-        val mode: DictionaryAccessMode,
-        val generation: Long
-    )
-    private var pickerSelection: PickerSelection? = null
+    private val picker = DictionaryPickerState(savedState)
     private var noticeId = 0L
 
     internal var state by mutableStateOf(
         DictionaryUiState(
             accessMode = DictionaryAccessMode.entries.firstOrNull {
                 it.name == preferences.getString("mode", null)
-            } ?: DictionaryAccessMode.DIRECT_ROOT
+            } ?: DictionaryAccessMode.DIRECT_ROOT,
+            language = picker.pending?.language ?: "zh_CN",
+            languageInput = picker.pending?.language ?: "zh_CN",
+            operation = if (picker.pending == null) DictionaryOperation.IDLE else DictionaryOperation.PICKING
         )
     )
         private set
 
     init {
-        load(showNotice = false)
+        if (picker.pending == null) load(showNotice = false)
     }
 
     internal fun changeAccessMode(mode: DictionaryAccessMode) {
@@ -102,6 +101,7 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     internal fun shizukuBinderDead() {
         if (state.accessMode != DictionaryAccessMode.ROOT_SHIZUKU) return
         val staleGeneration = generation++
+        picker.invalidate()
         val operation = when (state.operation) {
             DictionaryOperation.AUTHORIZING, DictionaryOperation.CONFIRMING_DELETE -> DictionaryOperation.IDLE
             else -> state.operation
@@ -205,14 +205,14 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
     // Capture language and backend before SAF; the result may arrive after rotation or binder death.
     internal fun beginPicking(): Boolean {
         if (state.operation != DictionaryOperation.IDLE) return false
-        pickerSelection = PickerSelection(state.language, state.accessMode, generation)
+        picker.begin(state.language, state.accessMode)
         state = state.copy(operation = DictionaryOperation.PICKING)
         return true
     }
 
     internal fun pickerFailed(error: Exception) {
         if (state.operation != DictionaryOperation.PICKING) return
-        pickerSelection = null
+        picker.clear()
         state = state.copy(
             operation = DictionaryOperation.IDLE,
             error = readable(error),
@@ -222,12 +222,18 @@ class DictionaryViewModel(application: Application) : AndroidViewModel(applicati
 
     internal fun documentsPicked(uris: List<Uri>) {
         if (state.operation != DictionaryOperation.PICKING) return
-        val selection = pickerSelection
-        pickerSelection = null
-        if (uris.isEmpty() || selection == null ||
-            selection.mode != state.accessMode || selection.generation != generation
-        ) {
+        val selection = picker.take(state.accessMode)
+        if (uris.isEmpty()) {
             state = state.copy(operation = DictionaryOperation.IDLE)
+            if (state.snapshot == null) load(showNotice = false)
+            return
+        }
+        if (selection == null) {
+            state = state.copy(
+                operation = DictionaryOperation.IDLE,
+                error = getApplication<Application>().getString(R.string.dictionary_error_picker_expired),
+                notice = notice(R.string.dictionary_failed)
+            )
             return
         }
         val language = selection.language

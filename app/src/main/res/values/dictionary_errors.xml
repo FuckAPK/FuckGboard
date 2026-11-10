@@ -14,4 +14,5 @@
     <string name="dictionary_error_rename">Atomic replacement failed. The original file was not replaced.</string>
     <string name="dictionary_error_io">File I/O or the Root command failed.</string>
     <string name="dictionary_error_provider">Could not read the selected file name or contents.</string>
+    <string name="dictionary_error_picker_expired">This file selection expired because the authorization context changed. Select the dictionaries again.</string>
 </resources>

@@ -33,7 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.DEFAULT_ARGS_KEY
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -91,10 +93,16 @@ class DictionaryActivity : ComponentActivity() {
         Shizuku.addRequestPermissionResultListener(permissionListener)
         Shizuku.addBinderDeadListener(binderDeadListener)
         Shizuku.addBinderReceivedListenerSticky(binderReceivedListener)
-        dictionaryViewModel = ViewModelProvider(this)[DictionaryViewModel::class.java]
+        // Privileged picker context may come from saved state, never launch Intent extras.
+        val extras = MutableCreationExtras(defaultViewModelCreationExtras).apply {
+            this[DEFAULT_ARGS_KEY] = Bundle.EMPTY
+        }
+        dictionaryViewModel = ViewModelProvider(
+            viewModelStore, defaultViewModelProviderFactory, extras,
+        )[DictionaryViewModel::class.java]
         if (binderReceivedBeforeViewModel) dictionaryViewModel.shizukuBinderReceived()
         if (dictionaryViewModel.state.accessMode == DictionaryAccessMode.ROOT_SHIZUKU &&
-            !Shizuku.pingBinder()
+            dictionaryViewModel.state.operation != DictionaryOperation.PICKING && !Shizuku.pingBinder()
         ) {
             dictionaryViewModel.shizukuBinderDead()
         }

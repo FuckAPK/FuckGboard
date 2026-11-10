@@ -14,4 +14,5 @@
     <string name="dictionary_error_rename">原子替换失败，原文件未被覆盖</string>
     <string name="dictionary_error_io">文件读写或 Root 命令执行失败</string>
     <string name="dictionary_error_provider">无法读取所选文件的名称或内容</string>
+    <string name="dictionary_error_picker_expired">授权状态已变化，此次文件选择已失效，请重新选择词库。</string>
 </resources>
