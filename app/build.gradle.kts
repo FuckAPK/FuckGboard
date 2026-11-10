@@ -8,8 +8,6 @@ android {
 
     defaultConfig {
         applicationId = "org.lyaaz.fuckgboard"
-        versionCode = 4
-        versionName = "1.3"
     }
 }
 
